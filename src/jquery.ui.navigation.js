@@ -1,3 +1,6 @@
+/*global $, jQuery*/
+
+
 /**
  * Menu Widget
  *
@@ -49,34 +52,15 @@ $.widget('phlex.navigation', {
     _create: function () {
     
         var self    = this,
-            options = this.options
-            menu    = this.element;
+            options = this.options,
+            menu    = this.element,
             items   = this._items = menu.find(options.itemSelector);
             
         self._setCurrent(items.first());
         
         menu.bind('mouseenter.' + self.widgetEventPrefix, $.proxy(self._handleHover, self))
             .bind('mouseleave.' + self.widgetEventPrefix, $.proxy(self._handleLeave, self))
-            .bind('keydown.' + self.widgetEventPrefix, function (event){
-            	switch (event.keyCode) {
-                    case $.ui.keyCode.UP:
-                    	self._handleToPrevious(event);
-                    	event.preventDefault();
-                    	break;
-                    case $.ui.keyCode.DOWN:
-                    	self._handleToNext(event);
-                    	event.preventDefault();
-                    	break;
-                	case $.ui.keyCode.LEFT:
-                		self._handleToParent(event);
-                		event.preventDefault();
-                		break;
-                	case $.ui.keyCode.RIGHT:
-                		self._handleToSubmenu(event);
-                		event.preventDefault();
-                		break;
-            	};
-            });
+            .bind('keydown.' + self.widgetEventPrefix, $.proxy(self._handleKeydown, self));
              
         items.each(function(){
         
@@ -135,14 +119,31 @@ $.widget('phlex.navigation', {
     
     _setCurrent: function(elem) {
     
-        link = elem.children('a').removeAttr('tabindex');
-               
-        this._items.children('a')
+        var link = elem.children('a').removeAttr('tabindex'),
+            notFirstLevel;
+          
+        this._items.not(this._getFirstLevelItemFilter())
+                   .children('a')
                    .not(link)
                    .attr('tabindex', '-1');
         
         this._current = elem;
         this._refresh();
+    },
+    
+    /**
+     * Returns a Filter callback function
+     *
+     * @param {integer} index of DOM element
+     * @scope {jQuery} DOMElement Element to check
+     */
+    _getFirstLevelItemFilter: function() {
+    
+        var self = this;
+        
+        return function(index) {
+            return jQuery(this).parent().is(self.element);
+        };
     },
     
     /**
@@ -164,17 +165,18 @@ $.widget('phlex.navigation', {
         
         if (this._isOpen) {
             current.children(options.submenuSelector)
-                   .show()
-                   .position($.extend({
-                       of: link,
-                       collision: 'none'
-                   }, options.position));
-            
+
+               .slideDown(200)
+               .position($.extend({
+                   of: link,
+                   collision: 'none'
+               }, options.position));
+
             items.not(currentPath)
                  .children(options.submenuSelector)
-                 .hide();
+                 .slideUp(100)
         } else {
-            items.children(options.submenuSelector).hide();
+            items.children(options.submenuSelector).hide(100);
         }
     },
     
@@ -204,11 +206,63 @@ $.widget('phlex.navigation', {
         // Reset mouse tracking for opening
         self.element.unbind('mousemove.' + self.widgetEventPefix);
         clearInterval(self._trackTimer);
-        
+       
         if (self._isOpen) {
             self._closeTimer = setTimeout(function () {
                 self.close();
             }, self.options.timeout);
+        }
+    },
+    
+    /**
+     * Handles action when a key goes down
+     *
+     * @param {eventObject} event jQuery event object
+     */
+    _handleKeydown: function (event){
+    
+        var self           = this,
+            isFirstLevel   = self._current.is(self._getFirstLevelItemFilter()),
+            preventDefault = true;
+            
+        if (isFirstLevel) {
+            switch (event.keyCode) {
+                case $.ui.keyCode.UP:
+            		// Do nothing
+                	break;
+                case $.ui.keyCode.DOWN:
+            		self._handleToSubmenu(event);                
+                	break;
+            	case $.ui.keyCode.LEFT:
+                   	self._handleToPrevious(event);            	
+            		break;
+            	case $.ui.keyCode.RIGHT:
+                	self._handleToNext(event);            	
+            		break;
+            	default:
+            	    preventDefault = false;
+            };        	
+        } else {
+            switch (event.keyCode) {
+                case $.ui.keyCode.UP:
+                   	self._handleToPrevious(event);
+                	break;
+                case $.ui.keyCode.DOWN:
+                	self._handleToNext(event);
+                	break;
+            	case $.ui.keyCode.LEFT:
+            		self._handleToParent(event);
+            		break;
+            	case $.ui.keyCode.RIGHT:
+            		self._handleToSubmenu(event);
+            		break;
+            	default:
+            	    preventDefault = false;
+            };
+        }
+        
+        if (preventDefault) {
+            event.preventDefault();
         }
     },
     
@@ -247,9 +301,15 @@ $.widget('phlex.navigation', {
      */    
     _handleToSubmenu: function (event) {
         this.open();
-        this._current
+        /*this._current                     // removed, because this code only works, if the dropdown is a list
             .children(this.options.submenuSelector)
             .children(this.options.itemSelector)
+            .first()
+            .children('a')
+            .focus();*/
+        /* instead used this code, to get first li in dropdown for complex dropdown layouts */
+        this._current
+            .find(this.options.itemSelector)
             .first()
             .children('a')
             .focus();
@@ -295,7 +355,6 @@ $.widget('phlex.navigation', {
      * Opens the menu
      */
     open: function () {
-    
         if (this._trigger('beforeopen') === false){
     		return;
     	}
