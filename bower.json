@@ -3,6 +3,8 @@
   "version": "0.2.0",
   "homepage": "https://github.com/soophie/jquery-ui-navigation",
   "authors": [
+    "Michael van Engelshoven <mvengelshoven@brainbits.net>",
+    "Niklas Köhler <nkoehler@brainbits.net>",
     "Antonia Ilski <ailski@brainbits.net>"
   ],
   "description": "accessible and responsive dropdown navigation for jquery and jquery.ui",
