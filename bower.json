@@ -1,0 +1,15 @@
+{
+  "name": "jquery-ui-navigation",
+  "version": "0.2.0",
+  "homepage": "https://github.com/soophie/jquery-ui-navigation",
+  "authors": [
+    "Antonia Ilski <ailski@brainbits.net>"
+  ],
+  "description": "accessible and responsive dropdown navigation for jquery and jquery.ui",
+  "main": "src/jquery.ui.navigation.js",
+  "license": "MIT",
+  "repository": {
+  	"type": "git",
+  	"url": "git@github.com:soophie/jquery-ui-navigation.git"
+  }
+}
