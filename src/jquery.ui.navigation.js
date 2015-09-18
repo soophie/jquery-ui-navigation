@@ -156,7 +156,7 @@ $.widget('phlex.navigation', {
             menu        = this.element,
             current     = this._current,
             link        = current.children('a').first(),
-            depth       = current.parents(options.submenuSelector).not(menu.parents()).length
+            depth       = current.parents(options.submenuSelector).not(menu.parents()).length,
             currentPath = current.parents(options.itemSelector).andSelf();
 
         options = this._getOptionsForDepth(depth);
