@@ -176,7 +176,7 @@ $.widget('phlex.navigation', {
                  .children(options.submenuSelector)
                  .slideUp(100)
         } else {
-            items.children(options.submenuSelector).hide(100);
+            items.children(options.submenuSelector).hide();
         }
     },
     
