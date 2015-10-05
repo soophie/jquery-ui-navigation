@@ -8,7 +8,6 @@
  * @copyright 2011 Brainbits GmbH
  * @version   $id$
  */
-(function ($, undefined) {
 
 $.widget('phlex.navigation', {
 
@@ -380,5 +379,3 @@ $.widget('phlex.navigation', {
     }
     
 });
-
-}(jQuery));
